@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Air Ticket Calculator</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+        }
+        input, select, button {
+            display: block;
+            margin: 10px 0;
+            padding: 8px;
+            width: 250px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Расчет стоимости авиабилета</h1>
+
+<input id="passport" placeholder="Паспорт">
+<input id="basePrice" type="number" placeholder="Базовая стоимость">
+<input id="baggageWeight" type="number" placeholder="Вес багажа">
+
+<select id="serviceClass">
+    <option value="economy">economy</option>
+    <option value="business">business</option>
+</select>
+
+<button onclick="calculateTicket()">Рассчитать</button>
+
+<div id="result"></div>
+
+<script>
+async function calculateTicket() {
+    const passport = document.getElementById('passport').value;
+    const basePrice = Number(document.getElementById('basePrice').value);
+    const baggageWeight = Number(document.getElementById('baggageWeight').value);
+    const serviceClass = document.getElementById('serviceClass').value;
+
+    const response = await fetch('/api/tickets/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            passport,
+            basePrice,
+            baggageWeight,
+            serviceClass
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.finalPrice) {
+        document.getElementById('result').innerText = 'Итоговая стоимость: ' + data.finalPrice;
+    } else {
+        document.getElementById('result').innerText = data.message;
+    }
+}
+</script>
+
+</body>
+</html>
