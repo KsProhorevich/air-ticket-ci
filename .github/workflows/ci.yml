@@ -269,12 +269,37 @@ jobs:
           name: allure-report-html
           path: gh-pages-publish/
 
-      - name: Deploy to GitHub Pages
+      # Отчёт лежит в подкаталоге, не в корне → https://…/air-ticket-ci/ давал бы 404 без index.html ниже.
+      - name: Deploy Allure HTML (версированный каталог)
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: gh-pages-publish
           destination_dir: allure-reports/run-${{ github.run_number }}
+          keep_files: true
+          force_orphan: false
+
+      - name: Подготовить корень сайта (редирект на последний отчёт)
+        env:
+          RUN_NUM: ${{ github.run_number }}
+        run: |
+          mkdir -p site-root
+          {
+            echo '<!DOCTYPE html>'
+            echo '<html lang="ru"><head><meta charset="utf-8">'
+            printf '<meta http-equiv="refresh" content="2; url=allure-reports/run-%s/">\n' "${RUN_NUM}"
+            echo '<title>Allure — CI</title></head><body>'
+            printf '<p>Последний отчёт: <a href="allure-reports/run-%s/">allure-reports/run-%s/</a></p>\n' "${RUN_NUM}" "${RUN_NUM}"
+            echo '<p><a href="allure-reports/">Архив прогонов</a></p>'
+            echo '</body></html>'
+          } > site-root/index.html
+
+      - name: Deploy корня GitHub Pages (убирает 404 на главной)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site-root
+          keep_files: true
           force_orphan: false
 
   docker-tests:
