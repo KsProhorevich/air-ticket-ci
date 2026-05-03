@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","604","Расчет стоимости билета через UI","chromium","2026-05-03","passed","2026-05-03","","ui.spec.js","",""
