@@ -37,7 +37,6 @@ jobs:
 
   unit-tests:
     runs-on: ${{ matrix.os }}
-    needs: actionlint
 
     defaults:
       run:
@@ -83,7 +82,6 @@ jobs:
 
   api-tests:
     runs-on: ${{ matrix.os }}
-    needs: actionlint
 
     defaults:
       run:
@@ -135,7 +133,6 @@ jobs:
 
   ui-tests:
     runs-on: ${{ matrix.os }}
-    needs: actionlint
 
     defaults:
       run:
@@ -230,22 +227,22 @@ jobs:
         run: |
           set -euo pipefail
 
-          dirs=$(find downloaded -type d -path '**/allure-results' | paste -sd' ' - || true)
+          mapfile -t inputs < <(find downloaded -type d -path '**/allure-results' 2>/dev/null || true)
 
-          if [[ -z "$dirs" ]]; then
-            dirs=$(find downloaded -mindepth 1 -maxdepth 1 -type d ! -path '**/.*' | paste -sd' ' - || true)
+          if [[ ${#inputs[@]} -eq 0 ]]; then
+            mapfile -t inputs < <(find downloaded -mindepth 1 -maxdepth 1 -type d ! -path '**/.*' 2>/dev/null || true)
           fi
 
-          if [[ -z "$dirs" ]]; then
-            dirs=$(find downloaded -type f -name '*-result.json' -exec dirname {} \; | sort -u | paste -sd' ' - || true)
+          if [[ ${#inputs[@]} -eq 0 ]]; then
+            mapfile -t inputs < <(find downloaded -type f -name '*-result.json' -exec dirname {} \; 2>/dev/null | sort -u || true)
           fi
 
-          if [[ -z "$dirs" ]]; then
+          if [[ ${#inputs[@]} -eq 0 ]]; then
             echo "Не удалось найти каталоги с результатами Allure"
             exit 1
           fi
 
-          npx allure generate ${dirs} --clean -o allure-report
+          npx allure generate "${inputs[@]}" --clean -o allure-report
 
       - name: Upload Allure HTML
         if: always()
@@ -283,7 +280,6 @@ jobs:
   docker-tests:
     name: Tests in Docker (продвинутый уровень)
     runs-on: ubuntu-latest
-    needs: actionlint
 
     steps:
       - uses: actions/checkout@v4
@@ -318,10 +314,15 @@ jobs:
           API="${{ needs.api-tests.result }}"
           UI="${{ needs.ui-tests.result }}"
 
+          NOTE=""
+          if [[ "$UNIT" == "skipped" || "$API" == "skipped" || "$UI" == "skipped" ]]; then
+            NOTE=" (skipped часто означает, что задача зависела от упавшей джобы либо прогон отменён; см. вкладку Jobs.)"
+          fi
+
           if [[ "$UNIT" == "success" && "$API" == "success" && "$UI" == "success" ]]; then
             MSG="✅ CI успешно: ${{ github.repository }} #${{ github.run_number }}. Все задачи прошли. ${RUN_URL}"
           else
-            MSG="❌ CI с ошибкой: ${{ github.repository }} #${{ github.run_number }}. Результаты — unit:${UNIT}, api:${API}, ui:${UI}. ${RUN_URL}"
+            MSG="❌ CI с ошибкой: ${{ github.repository }} #${{ github.run_number }}. Результаты — unit:${UNIT}, api:${API}, ui:${UI}.${NOTE} ${RUN_URL}"
           fi
 
           if [[ -z "$TELEGRAM_TOKEN" || -z "$TELEGRAM_CHAT_ID" ]]; then
