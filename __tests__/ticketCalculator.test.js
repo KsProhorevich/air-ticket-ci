@@ -29,6 +29,11 @@ describe('Функция расчета авиабилета', () => {
             expect(result.finalPrice).toBe(180);
         });
 
+        test('Platinum loyalty дает максимальную скидку', () => {
+            const result = calculateTicketPrice(200, 20, 'economy', 'platinum');
+            expect(result.finalPrice).toBe(170);
+        });
+
     });
 
     describe('Негативные сценарии', () => {

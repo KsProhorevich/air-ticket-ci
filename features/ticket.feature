@@ -20,6 +20,7 @@ Scenario Outline: Расчет стоимости билета для разны
 
 Examples:
   | passport | basePrice | baggageWeight | serviceClass | statusCode | expectedResult |
+  | EF111222 | 200 | 20 | economy | 200 | 170 |
   | AB123456 | 200 | 20 | economy | 200 | 180 |
   | AB123456 | 200 | 25 | economy | 200 | 405 |
   | CD654321 | 200 | 20 | business | 200 | 342 |

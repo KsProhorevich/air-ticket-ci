@@ -1,3 +1,10 @@
 module.exports = {
-    default: `--require steps/**/*.js features/**/*.feature`
+    default: {
+        require: ['steps/**/*.js'],
+        paths: ['features/**/*.feature'],
+        format: ['summary', 'allure-cucumberjs/reporter'],
+        formatOptions: {
+            resultsDir: 'allure-results',
+        },
+    },
 };
