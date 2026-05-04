@@ -1,4 +1,4 @@
-# Playwright-базис: Node.js, системные зависимости браузера (для продвинутого уровня лаб.)
+# Playwright-базис: Node.js, системные зависимости браузера
 FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
 WORKDIR /app

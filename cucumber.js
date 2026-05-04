@@ -4,7 +4,7 @@ module.exports = {
         paths: ['features/**/*.feature'],
         format: ['summary', 'allure-cucumberjs/reporter'],
         formatOptions: {
-            resultsDir: 'allure-results',
+            resultsDir: 'allure-results/cucumber',
         },
     },
 };
